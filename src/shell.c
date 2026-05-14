@@ -33,22 +33,28 @@ int main(void) {
  * @brief Sets up the action taken by the shell
  * for the signals SIGINT and SIGQUIT. SIGQUIT is
  * ignored while SIGINT is handled by the custom
- * sigIntHandler() function.
+ * sigIntHandler() function. Additionally it also
+ * sets up SIGTTOU signal to be ignored permenantly
+ * so that the shell process can take back control
+ * when the child process has completed.
  *
  * @return Returns 0 on success. On failure -1 is
  * returned
  */
 int signalSetup() {
-    struct sigaction intAct, quitAct;
+    struct sigaction intAct, quitAct, ttoAct;
 
     intAct.sa_flags = 0;
     quitAct.sa_flags = 0;
+    ttoAct.sa_flags = 0;
 
     sigemptyset(&intAct.sa_mask);
     sigemptyset(&quitAct.sa_mask);
+    sigemptyset(&ttoAct.sa_mask);
 
     intAct.sa_handler = sigIntHandler;
     quitAct.sa_handler = SIG_IGN;
+    ttoAct.sa_handler = SIG_IGN;
 
 
     if (sigaction(SIGINT, &intAct, NULL) == -1) {
@@ -56,6 +62,10 @@ int signalSetup() {
         return -1;
     }
     if (sigaction(SIGQUIT, &quitAct, NULL) == -1) {
+        perror("sigaction failed");
+        return -1;
+    }
+    if (sigaction(SIGTTOU, &ttoAct, NULL) == -1 ) {
         perror("sigaction failed");
         return -1;
     }
@@ -380,16 +390,8 @@ int execCommand(char *const *tokens, int *exitStatus, const char **redirectFiles
         }
 
         // Gets back control from the child
-        if (signal(SIGTTOU, SIG_IGN) == SIG_ERR) {
-            perror("signal failed");
-            return 1;
-        }
         if (tcsetpgrp(0, getpid()) < 0) {
             perror("tcsetpgrp failed");
-            return 1;
-        }
-        if (signal(SIGTTOU, SIG_DFL) == SIG_ERR) {
-            perror("signal failed");
             return 1;
         }
     } else { // error
