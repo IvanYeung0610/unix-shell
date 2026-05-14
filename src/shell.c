@@ -6,7 +6,7 @@
 
 #include "../include/shell.h"
 
-int main(int argc, char *argv[]) {
+int main(void) {
     char **tokens = malloc(sizeof(char*) * INITIAL_CAP);
     char **tokens2 = malloc(sizeof(char*) * INITIAL_CAP);
     char *line = NULL;
