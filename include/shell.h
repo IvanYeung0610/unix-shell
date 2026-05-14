@@ -1,3 +1,9 @@
+/*
+ * Unix Shell
+ * Ivan Yeung
+ * NYU Tandon
+ */
+
 #ifndef SHELL_H
 #define SHELL_H
 

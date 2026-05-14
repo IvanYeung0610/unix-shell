@@ -313,7 +313,11 @@ int checkCommand(const char **tokens, bool *exitLoop,
 /**
  * @brief Executes the command and arguments specified by tokens.
  * Additionally it records the exit status of the child when the child
- * terminates.
+ * terminates. It also properly handles job control when the child is
+ * created. The both and shell and child process will make the child's
+ * process group the child's pid to prevent a race condition. The shell
+ * will then give control of the terminal to the child and take back
+ * control of the terminal once the child has exited.
  *
  * @param tokens Array of strings that were inputted to the shell
  * @param exitStatus Stores the exit status of the child process
@@ -327,6 +331,12 @@ int execCommand(char *const *tokens, int *exitStatus, const char **redirectFiles
     int wstatus;
     pid = fork();
     if (pid == 0) { // child
+        // Make child its own process group
+        if (setpgid(getpid(), getpid()) < 0) {
+            perror("setpgid failed");
+            _exit(1);
+        }
+
         if (resetDisposition() == -1) {
             fputs("resetDispostion failed!\n", stderr);
             _exit(1);
@@ -342,6 +352,16 @@ int execCommand(char *const *tokens, int *exitStatus, const char **redirectFiles
             _exit(1);
         }
     } else if (pid > 0) { // parent
+        //Give child its own process group and the controlling terminal
+        if (setpgid(pid, pid) < 0) {
+            perror("setpgid failed");
+            return 1;
+        }
+        if (tcsetpgrp(0, pid) < 0) {
+            perror("tcsetpgrp failed");
+            return 1;
+        }
+
         int waitRes;
         errno = 0;
         while ((waitRes = wait(&wstatus)) == -1 && errno == EINTR) {
@@ -358,6 +378,20 @@ int execCommand(char *const *tokens, int *exitStatus, const char **redirectFiles
             *exitStatus = WEXITSTATUS(wstatus);
         } else if (WIFSIGNALED(wstatus)) {
             *exitStatus = WTERMSIG(wstatus) + 128;
+        }
+
+        // Gets back control from the child
+        if (signal(SIGTTOU, SIG_IGN) == SIG_ERR) {
+            perror("signal failed");
+            return 1;
+        }
+        if (tcsetpgrp(0, getpid()) < 0) {
+            perror("tcsetpgrp failed");
+            return 1;
+        }
+        if (signal(SIGTTOU, SIG_DFL) == SIG_ERR) {
+            perror("signal failed");
+            return 1;
         }
     } else { // error
         perror("Fork failed");
