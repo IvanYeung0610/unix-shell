@@ -364,7 +364,8 @@ int execCommand(char *const *tokens, int *exitStatus, const char **redirectFiles
 
         int waitRes;
         errno = 0;
-        while ((waitRes = wait(&wstatus)) == -1 && errno == EINTR) {
+        while ((waitRes = waitpid(pid, &wstatus, WUNTRACED)) == -1 
+            && errno == EINTR) {
             // keeps waiting if SIGINT interrupted wait
         }
 
