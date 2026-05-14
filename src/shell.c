@@ -70,10 +70,8 @@ int signalSetup() {
  * @param signalNum The signal being handled 
  */
 void sigIntHandler(int signalNum) {
-    if(write(STDOUT_FILENO, "\n", 1) == -1) {
-        perror("write failed");
-        exit(1);
-    }
+    (void)signalNum;
+    write(STDOUT_FILENO, "\n", 1);
 }
 
 /**
