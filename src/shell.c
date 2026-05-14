@@ -353,7 +353,7 @@ int execCommand(char *const *tokens, int *exitStatus, const char **redirectFiles
         }
     } else if (pid > 0) { // parent
         //Give child its own process group and the controlling terminal
-        if (setpgid(pid, pid) < 0) {
+        if (setpgid(pid, pid) < 0 && errno != EACCES) {
             perror("setpgid failed");
             return 1;
         }
