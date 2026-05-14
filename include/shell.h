@@ -30,7 +30,7 @@ int redirectIO(const char *file, int flags, mode_t mode,
                int FILENO, int FILENO2);
 int handleCdRedirect(const char *file);
 int createFile(const char *file);
-void checkPipe(const char *line, char **line2);
+void checkPipe(char *line, char **line2);
 int execPipe(char *const *tokens, char *const *tokens2, int *exitStatus,
                 const char **redirectFiles, const char **redirectFiles2);
 void pipeChild(char *const *tokens, const char **redirectFiles, int *pipefd,

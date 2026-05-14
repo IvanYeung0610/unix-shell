@@ -67,7 +67,7 @@ int signalSetup() {
  * @brief Signal handler for the SIGINT signal.
  * It wites a newline to standard output.
  *
- * @param signalNum Signal being handled.
+ * @param signalNum The signal being handled 
  */
 void sigIntHandler(int signalNum) {
     if(write(STDOUT_FILENO, "\n", 1) == -1) {
@@ -188,7 +188,7 @@ int runShell(char *line, char ***tokens, char ***tokens2, size_t cap) {
 int parseLine(char *line, char ***tokens, int *exitStatus, 
               const char **redirectFiles, size_t *cap) {
     char* args = strtok(line, " ");
-    int index = 0;
+    size_t index = 0;
     while (args != NULL) {
         // replaces $? token with exit status
         if (strncmp(args, "$?", TOK_LEN_MAX) == 0) {
@@ -522,7 +522,7 @@ int createFile(const char *file) {
  * @param line The line entered into the shell
  * @param line2 The address to store the second part of the pipe
  */
-void checkPipe(const char *line, char **line2) {
+void checkPipe(char *line, char **line2) {
     char *pipeLoc = strchr(line, '|');
     if (pipeLoc != NULL) {
         *pipeLoc = '\0';
