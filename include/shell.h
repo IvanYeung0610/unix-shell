@@ -15,12 +15,9 @@
 #define INITIAL_CAP 8
 #define TOK_LEN_MAX 4096
 
-// signals.c
 int signalSetup();
 void sigIntHandler(int signalNum);
 int resetDisposition();
-
-// shell.c
 int runShell(char *line, char ***tokens, char ***tokens2, size_t cap);
 int parseLine(char *line, char ***tokens, int *exitStatus, 
               const char **redirectFiles, size_t *cap);
@@ -28,15 +25,11 @@ int checkCommand(const char **tokens, bool *exitLoop, int numToks,
                  int *exitStatus, const char **redirectFiles);
 int execCommand(char *const *tokens, int *exitStatus, 
                 const char **redirectFiles);
-
-// redirect.c
 int handleRedirect(const char **redirectFiles);
 int redirectIO(const char *file, int flags, mode_t mode, 
                int FILENO, int FILENO2);
 int handleCdRedirect(const char *file);
 int createFile(const char *file);
-
-// pipe.c
 void checkPipe(const char *line, char **line2);
 int execPipe(char *const *tokens, char *const *tokens2, int *exitStatus,
                 const char **redirectFiles, const char **redirectFiles2);
